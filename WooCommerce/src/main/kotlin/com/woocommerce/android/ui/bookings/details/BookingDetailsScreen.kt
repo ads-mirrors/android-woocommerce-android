@@ -42,6 +42,7 @@ import com.woocommerce.android.ui.bookings.compose.BookingStatus
 import com.woocommerce.android.ui.bookings.compose.BookingSummary
 import com.woocommerce.android.ui.bookings.compose.BookingSummaryModel
 import com.woocommerce.android.ui.compose.component.Toolbar
+import com.woocommerce.android.ui.compose.modifier.detailsPanePadding
 import com.woocommerce.android.ui.compose.theme.WooThemeWithBackground
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -91,7 +92,9 @@ fun BookingDetailsScreen(
                     BookingDetailsContent(
                         viewState = viewState,
                         onShowAttendanceSheet = { showAttendanceSheet.value = true },
-                        onViewOrder = onViewOrder
+                        onViewOrder = onViewOrder,
+                        modifier = Modifier
+                            .detailsPanePadding()
                     )
                 }
             }
@@ -111,7 +114,8 @@ fun BookingDetailsScreen(
 fun BookingDetailsEmptyScreen() {
     Surface(
         color = colorResource(R.color.default_window_background),
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -132,9 +136,12 @@ fun BookingDetailsEmptyScreen() {
 private fun BookingDetailsContent(
     viewState: BookingDetailsViewState,
     onViewOrder: (Long) -> Unit,
-    onShowAttendanceSheet: () -> Unit = {}
+    modifier: Modifier = Modifier,
+    onShowAttendanceSheet: () -> Unit = {},
 ) {
-    Column {
+    Column(
+        modifier = modifier,
+    ) {
         viewState.bookingUiState?.let {
             BookingSummary(
                 model = viewState.bookingUiState.bookingSummary,

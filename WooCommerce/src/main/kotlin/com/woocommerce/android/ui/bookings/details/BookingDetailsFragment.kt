@@ -5,7 +5,6 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.woocommerce.android.ui.base.BaseFragment
@@ -23,18 +22,14 @@ class BookingDetailsFragment : BaseFragment() {
         get() = AppBarStatus.Hidden
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return FrameLayout(requireContext()).apply {
-            addView(
-                composeView {
-                    BookingDetailsScreen(
-                        viewModel = viewModel,
-                        onBack = { findNavController().popBackStack() },
-                        onViewOrder = { orderId ->
-                            findNavController().navigate(
-                                BookingDetailsFragmentDirections
-                                    .actionBookingDetailsFragmentToOrderDetailFragment(orderId)
-                            )
-                        }
+        return composeView {
+            BookingDetailsScreen(
+                viewModel = viewModel,
+                onBack = { findNavController().popBackStack() },
+                onViewOrder = { orderId ->
+                    findNavController().navigate(
+                        BookingDetailsFragmentDirections
+                            .actionBookingDetailsFragmentToOrderDetailFragment(orderId)
                     )
                 }
             )
