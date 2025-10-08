@@ -49,7 +49,7 @@ class BookingDetailsViewModelTest : BaseUnitTest() {
     @Test
     fun `given booking, when emitted after ViewModel created, then toolbar title uses booking id`() = testBlocking {
         // Given
-        val savedState = SavedStateHandle(mapOf("bookingId" to 123L))
+        val savedState = SavedStateHandle(mapOf("mode" to BookingDetailsFragment.Mode.ShowBooking(123L)))
         val expectedBookingId = 1L
 
         // When
@@ -63,7 +63,7 @@ class BookingDetailsViewModelTest : BaseUnitTest() {
     @Test
     fun `when onAttendanceStatusSelected called, then state updates with new status`() = testBlocking {
         // Given
-        val savedState = SavedStateHandle(mapOf("bookingId" to 456L))
+        val savedState = SavedStateHandle(mapOf("mode" to BookingDetailsFragment.Mode.ShowBooking(456L)))
         val viewModel = createViewModel(savedState)
 
         // When
@@ -78,7 +78,7 @@ class BookingDetailsViewModelTest : BaseUnitTest() {
     @Test
     fun `given booking emitted, when observed by ViewModel, then state is updated`() = testBlocking {
         // Given
-        val savedState = SavedStateHandle(mapOf("bookingId" to 789L))
+        val savedState = SavedStateHandle(mapOf("mode" to BookingDetailsFragment.Mode.ShowBooking(789L)))
         val viewModel = createViewModel(savedState)
 
         // When
@@ -89,6 +89,21 @@ class BookingDetailsViewModelTest : BaseUnitTest() {
         val state = viewModel.state.getOrAwaitValue()
         assertThat(state.bookingUiState).isNotNull
         assertThat(state.orderId).isEqualTo(2L)
+    }
+
+    @Test
+    fun `given Empty mode, when ViewModel created, then state is empty`() = testBlocking {
+        // Given
+        val savedState = SavedStateHandle(mapOf("mode" to BookingDetailsFragment.Mode.Empty))
+
+        // When
+        val viewModel = createViewModel(savedState)
+
+        // Then
+        val state = viewModel.state.getOrAwaitValue()
+        assertThat(state.bookingUiState).isNull()
+        assertThat(state.toolbarTitle).isEmpty()
+        assertThat(state.orderId).isEqualTo(0L)
     }
 
     private fun createViewModel(

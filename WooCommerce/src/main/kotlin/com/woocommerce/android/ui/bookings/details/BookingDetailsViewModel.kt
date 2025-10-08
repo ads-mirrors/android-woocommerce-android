@@ -1,6 +1,7 @@
 package com.woocommerce.android.ui.bookings.details
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.asLiveData
 import com.woocommerce.android.R
@@ -29,25 +30,30 @@ class BookingDetailsViewModel @Inject constructor(
 
     private val navArgs: BookingDetailsFragmentArgs by savedState.navArgs()
 
-    private val booking = bookingsRepository.observeBooking(navArgs.bookingId)
+    private val bookingId: Long? = (navArgs.mode as? BookingDetailsFragment.Mode.ShowBooking)?.bookingId
+    private val booking = bookingId?.let { bookingsRepository.observeBooking(it) }
 
     // Temporary, the booking status should come from the stored object
     private val bookingAttendanceStatus = MutableStateFlow<BookingAttendanceStatus?>(null)
 
-    val state: LiveData<BookingDetailsViewState> = combine(
-        booking.filterNotNull(),
-        bookingAttendanceStatus
-    ) { booking, attendanceStatus ->
-        with(bookingMapper) {
-            BookingDetailsViewState(
-                toolbarTitle = resourceProvider.getString(R.string.booking_details_title, booking.id.value),
-                orderId = booking.orderId,
-                bookingUiState = buildBookingUiState(booking, attendanceStatus),
-                onCancelBooking = ::onCancelBooking,
-                onAttendanceStatusSelected = ::onAttendanceStatusSelected
-            )
-        }
-    }.asLiveData()
+    val state: LiveData<BookingDetailsViewState> = if (booking != null) {
+        combine(
+            booking.filterNotNull(),
+            bookingAttendanceStatus
+        ) { booking, attendanceStatus ->
+            with(bookingMapper) {
+                BookingDetailsViewState(
+                    toolbarTitle = resourceProvider.getString(R.string.booking_details_title, booking.id.value),
+                    orderId = booking.orderId,
+                    bookingUiState = buildBookingUiState(booking, attendanceStatus),
+                    onCancelBooking = ::onCancelBooking,
+                    onAttendanceStatusSelected = ::onAttendanceStatusSelected
+                )
+            }
+        }.asLiveData()
+    } else {
+        MutableLiveData(BookingDetailsViewState())
+    }
 
     private fun onAttendanceStatusSelected(status: BookingAttendanceStatus) {
         // Temporary, the booking status should come from the stored object

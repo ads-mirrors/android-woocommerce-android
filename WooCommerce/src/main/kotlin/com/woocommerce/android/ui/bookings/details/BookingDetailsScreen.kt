@@ -1,22 +1,31 @@
 package com.woocommerce.android.ui.bookings.details
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.woocommerce.android.R
@@ -71,39 +80,18 @@ fun BookingDetailsScreen(
     ) { innerPadding ->
         Surface(
             color = colorResource(R.color.default_window_background),
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(innerPadding)
-            ) {
-                viewState.bookingUiState?.let {
-                    BookingSummary(
-                        model = viewState.bookingUiState.bookingSummary,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    BookingAppointmentDetails(
-                        model = viewState.bookingUiState.bookingsAppointmentDetails,
-                        onCancelBooking = viewState.onCancelBooking,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    BookingCustomerDetails(
-                        model = viewState.bookingUiState.bookingCustomerDetails,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    BookingAttendanceSection(
-                        status = viewState.bookingUiState.bookingSummary.attendanceStatus,
-                        onClick = { showAttendanceSheet.value = true },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    BookingPaymentSection(
-                        model = viewState.bookingUiState.bookingPaymentDetails,
-                        status = viewState.bookingUiState.bookingSummary.status,
-                        onMarkAsPaid = { onViewOrder(viewState.orderId) },
-                        onViewOrder = { onViewOrder(viewState.orderId) },
-                        onMarkAsRefunded = { onViewOrder(viewState.orderId) },
-                        modifier = Modifier.fillMaxWidth()
+            when {
+                viewState.bookingUiState == null -> BookingDetailsEmptyScreen()
+                else -> {
+                    BookingDetailsContent(
+                        viewState = viewState,
+                        onShowAttendanceSheet = { showAttendanceSheet.value = true },
+                        onViewOrder = onViewOrder
                     )
                 }
             }
@@ -114,6 +102,65 @@ fun BookingDetailsScreen(
                     viewState.onAttendanceStatusSelected(status)
                 },
                 onDismiss = { showAttendanceSheet.value = false }
+            )
+        }
+    }
+}
+
+@Composable
+fun BookingDetailsEmptyScreen() {
+    Surface(
+        color = colorResource(R.color.default_window_background),
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.img_woo_generic_error),
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.major_200)))
+            Text(text = stringResource(R.string.booking_not_selected))
+        }
+    }
+}
+
+@Composable
+private fun BookingDetailsContent(
+    viewState: BookingDetailsViewState,
+    onViewOrder: (Long) -> Unit,
+    onShowAttendanceSheet: () -> Unit = {}
+) {
+    Column {
+        viewState.bookingUiState?.let {
+            BookingSummary(
+                model = viewState.bookingUiState.bookingSummary,
+                modifier = Modifier.fillMaxWidth()
+            )
+            BookingAppointmentDetails(
+                model = viewState.bookingUiState.bookingsAppointmentDetails,
+                onCancelBooking = viewState.onCancelBooking,
+                modifier = Modifier.fillMaxWidth()
+            )
+            BookingCustomerDetails(
+                model = viewState.bookingUiState.bookingCustomerDetails,
+                modifier = Modifier.fillMaxWidth()
+            )
+            BookingAttendanceSection(
+                status = viewState.bookingUiState.bookingSummary.attendanceStatus,
+                onClick = onShowAttendanceSheet,
+                modifier = Modifier.fillMaxWidth()
+            )
+            BookingPaymentSection(
+                model = viewState.bookingUiState.bookingPaymentDetails,
+                status = viewState.bookingUiState.bookingSummary.status,
+                onMarkAsPaid = { onViewOrder(viewState.orderId) },
+                onViewOrder = { onViewOrder(viewState.orderId) },
+                onMarkAsRefunded = { onViewOrder(viewState.orderId) },
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -159,6 +206,21 @@ private fun BookingDetailsPreview() {
                         total = "$59.50"
                     )
                 ),
+            ),
+            onBack = {},
+            onViewOrder = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BookingDetailsEmptyPreview() {
+    WooThemeWithBackground {
+        BookingDetailsScreen(
+            viewState = BookingDetailsViewState(
+                toolbarTitle = "",
+                bookingUiState = null,
             ),
             onBack = {},
             onViewOrder = {}

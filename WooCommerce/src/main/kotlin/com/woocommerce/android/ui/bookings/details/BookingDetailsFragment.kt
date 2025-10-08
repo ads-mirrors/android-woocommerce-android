@@ -1,6 +1,7 @@
 package com.woocommerce.android.ui.bookings.details
 
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import com.woocommerce.android.ui.base.BaseFragment
 import com.woocommerce.android.ui.compose.composeView
 import com.woocommerce.android.ui.main.AppBarStatus
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.parcelize.Parcelize
 
 @AndroidEntryPoint
 class BookingDetailsFragment : BaseFragment() {
@@ -37,5 +39,14 @@ class BookingDetailsFragment : BaseFragment() {
                 }
             )
         }
+    }
+
+    @Parcelize
+    sealed class Mode : Parcelable {
+        @Parcelize
+        data object Empty : Mode()
+
+        @Parcelize
+        data class ShowBooking(val bookingId: Long) : Mode()
     }
 }
