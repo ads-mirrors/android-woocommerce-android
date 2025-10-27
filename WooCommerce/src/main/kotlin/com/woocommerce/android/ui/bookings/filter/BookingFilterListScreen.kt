@@ -49,6 +49,8 @@ fun BookingFilterListScreen(state: BookingFilterListUiState) {
             }
         },
         bottomBar = {
+            if (state.currentPage !is BookingFilterPage.List) return@Scaffold
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
