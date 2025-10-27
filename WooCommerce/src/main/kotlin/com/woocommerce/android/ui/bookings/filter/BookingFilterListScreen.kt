@@ -29,6 +29,7 @@ import com.woocommerce.android.ui.compose.component.Toolbar
 import com.woocommerce.android.ui.compose.component.WCColoredButton
 import com.woocommerce.android.ui.compose.preview.LightDarkThemePreviews
 import com.woocommerce.android.ui.compose.theme.WooThemeWithBackground
+import org.wordpress.android.fluxc.network.rest.wpcom.wc.bookings.BookingsFilterOption
 
 @Composable
 fun BookingFilterListScreen(state: BookingFilterListUiState) {
@@ -87,7 +88,18 @@ fun BookingFilterListScreen(state: BookingFilterListUiState) {
 
                 BookingFilterPage.AttendanceStatus,
                 BookingFilterPage.BookingType,
-                BookingFilterPage.Customer,
+                BookingFilterPage.Customer -> {
+                    BookingCustomerFilterPage { customer ->
+                        state.onUpdateFilterOption(
+                            BookingsFilterOption.Customer(
+                                customerId = customer.customerId ?: 0L,
+                                customerName = "${customer.firstName} ${customer.lastName}".trim()
+                            )
+                        )
+                        state.onClose()
+                    }
+                }
+
                 BookingFilterPage.Location,
                 BookingFilterPage.PaymentStatus,
                 BookingFilterPage.ServiceEvent,
